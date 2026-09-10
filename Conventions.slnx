@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Conventions.Analyzers/Conventions.Analyzers.csproj" />
+    <Project Path="src/Conventions.CodeFixes/Conventions.CodeFixes.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/Conventions.Tests/Conventions.Tests.csproj" />
+  </Folder>
+</Solution>

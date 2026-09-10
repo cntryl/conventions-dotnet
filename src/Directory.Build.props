@@ -1,0 +1,35 @@
+<Project>
+  <Import Project="../Directory.Build.props"/>
+
+  <PropertyGroup>
+    <!-- Roslyn components load into the compiler, which targets netstandard2.0. -->
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <IncludeSymbols>false</IncludeSymbols>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <PackageVersion>0.1.0</PackageVersion>
+    <Version>$(PackageVersion)</Version>
+    <InformationalVersion>$(PackageVersion)</InformationalVersion>
+    <Authors>cntryl</Authors>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/cntryl/conventions-dotnet</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/cntryl/conventions-dotnet</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <DebugType>portable</DebugType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageOutputPath>$(MSBuildThisFileDirectory)../artifacts/packages</PackageOutputPath>
+    <PackageTags>analyzers roslyn conventions tests naming arrange-act-assert xunit nunit mstest</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)../README.md" Pack="true" PackagePath="/"/>
+    <AdditionalFiles Include="$(MSBuildProjectDirectory)/AnalyzerReleases.Shipped.md"/>
+    <AdditionalFiles Include="$(MSBuildProjectDirectory)/AnalyzerReleases.Unshipped.md"/>
+    <None Include="$(OutputPath)$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
+  </ItemGroup>
+</Project>
