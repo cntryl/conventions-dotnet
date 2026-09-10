@@ -6,7 +6,7 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
-## [0.1.0]
+## [1.0.0]
 
 ### Added
 
@@ -21,5 +21,5 @@ All notable changes to this project are documented here. The format follows
 - xUnit, NUnit and MSTest attribute detection. Both analyzers stay inert in projects that
   reference no supported test framework.
 
-[Unreleased]: https://github.com/cntryl/conventions-dotnet/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/cntryl/conventions-dotnet/releases/tag/v0.1.0
+[Unreleased]: https://github.com/cntryl/conventions-dotnet/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/cntryl/conventions-dotnet/releases/tag/v1.0.0

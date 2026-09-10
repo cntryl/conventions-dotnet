@@ -18,9 +18,11 @@ jobs:
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: "10.0.x"
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
 
-      - name: Restore
-        run: dotnet restore Conventions.slnx
+      - name: Restore locked dependencies
+        run: dotnet restore Conventions.slnx --locked-mode
 
       - name: Check formatting
         run: dotnet format Conventions.slnx --verify-no-changes --no-restore --severity warn
@@ -43,9 +45,11 @@ jobs:
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: "10.0.x"
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
 
-      - name: Restore
-        run: dotnet restore Conventions.slnx
+      - name: Restore locked dependencies
+        run: dotnet restore Conventions.slnx --locked-mode
 
       - name: Pack NuGet packages
         run: dotnet pack Conventions.slnx -c Release --no-restore --output artifacts/packages

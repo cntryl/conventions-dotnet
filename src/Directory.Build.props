@@ -11,7 +11,8 @@
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <IncludeSymbols>false</IncludeSymbols>
     <DevelopmentDependency>true</DevelopmentDependency>
-    <PackageVersion>0.1.0</PackageVersion>
+    <!-- Overridden by the publish workflow with the GitVersion semver. -->
+    <PackageVersion>1.0.0</PackageVersion>
     <Version>$(PackageVersion)</Version>
     <InformationalVersion>$(PackageVersion)</InformationalVersion>
     <Authors>cntryl</Authors>

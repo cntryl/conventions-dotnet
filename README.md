@@ -11,6 +11,22 @@ Both rules detect xUnit, NUnit and MSTest, and stay inert in projects that refer
 
 ## Install
 
+Both packages are published to GitHub Packages, not nuget.org. Add the `cntryl` source to
+your `NuGet.Config`:
+
+```xml
+<packageSources>
+  <add key="cntryl" value="https://nuget.pkg.github.com/cntryl/index.json" />
+</packageSources>
+<packageSourceMapping>
+  <packageSource key="cntryl">
+    <package pattern="Cntryl.*" />
+  </packageSource>
+</packageSourceMapping>
+```
+
+Then reference them from the test project only:
+
 ```
 dotnet add package Cntryl.Conventions.Analyzers
 dotnet add package Cntryl.Conventions.CodeFixes
