@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace Cntryl.Conventions.Analyzers;
+namespace Cntryl.Conventions.Testing.Analyzers;
 
 /// <summary>
 /// Reports test methods whose bodies do not carry ordered Arrange/Act/Assert comments.

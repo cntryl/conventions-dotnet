@@ -1,14 +1,14 @@
 using System.Collections.Immutable;
 using System.Composition;
 using System.Threading.Tasks;
-using Cntryl.Conventions.Analyzers;
+using Cntryl.Conventions.Testing.Analyzers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Rename;
 
-namespace Cntryl.Conventions.CodeFixes;
+namespace Cntryl.Conventions.Testing.CodeFixes;
 
 /// <summary>
 /// Renames a third-person test method to its <c>Should</c>-prefixed form.

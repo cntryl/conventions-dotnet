@@ -4,14 +4,14 @@ using System.Composition;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Cntryl.Conventions.Analyzers;
+using Cntryl.Conventions.Testing.Analyzers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Cntryl.Conventions.CodeFixes;
+namespace Cntryl.Conventions.Testing.CodeFixes;
 
 /// <summary>
 /// Inserts the Arrange/Act/Assert phase comments into a test body.

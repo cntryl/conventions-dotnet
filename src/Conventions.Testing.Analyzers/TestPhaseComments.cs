@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Cntryl.Conventions.Analyzers;
+namespace Cntryl.Conventions.Testing.Analyzers;
 
 /// <summary>
 /// Locates the Arrange/Act/Assert phase markers inside a test body.

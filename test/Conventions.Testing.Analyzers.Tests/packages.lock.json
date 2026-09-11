@@ -184,13 +184,13 @@
           "xunit.extensibility.core": "[2.9.3]"
         }
       },
-      "Cntryl.Conventions.Analyzers": {
+      "Cntryl.Conventions.Testing.Analyzers": {
         "type": "Project"
       },
-      "Cntryl.Conventions.CodeFixes": {
+      "Cntryl.Conventions.Testing.CodeFixes": {
         "type": "Project",
         "dependencies": {
-          "Cntryl.Conventions.Analyzers": "[1.0.0, )"
+          "Cntryl.Conventions.Testing.Analyzers": "[1.0.0, )"
         }
       },
       "Microsoft.CodeAnalysis.CSharp": {

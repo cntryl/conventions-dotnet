@@ -1,7 +1,7 @@
-using Cntryl.Conventions.Analyzers;
-using Cntryl.Conventions.CodeFixes;
+using Cntryl.Conventions.Testing.Analyzers;
+using Cntryl.Conventions.Testing.CodeFixes;
 
-namespace Cntryl.Conventions.Tests;
+namespace Cntryl.Conventions.Testing.Tests;
 
 public sealed class TestStructureAnalyzerTests
 {

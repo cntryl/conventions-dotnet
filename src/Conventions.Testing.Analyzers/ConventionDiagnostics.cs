@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace Cntryl.Conventions.Analyzers;
+namespace Cntryl.Conventions.Testing.Analyzers;
 
 /// <summary>
 /// Diagnostic descriptors reported by the convention analyzers.

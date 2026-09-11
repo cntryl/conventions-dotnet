@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Cntryl.Conventions.Analyzers;
+namespace Cntryl.Conventions.Testing.Analyzers;
 
 /// <summary>
 /// Parses PascalCase test names into their Should/Given/When clauses.

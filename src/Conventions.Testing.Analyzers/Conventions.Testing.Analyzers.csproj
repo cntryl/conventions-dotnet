@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <Description>Roslyn analyzers enforcing Should/Given/When test naming and ordered Arrange/Act/Assert structure. Detects xUnit, NUnit and MSTest; inert when no test framework is referenced.</Description>
-    <PackageId>Cntryl.Conventions.Analyzers</PackageId>
-    <AssemblyName>Cntryl.Conventions.Analyzers</AssemblyName>
-    <RootNamespace>Cntryl.Conventions.Analyzers</RootNamespace>
+    <PackageId>Cntryl.Conventions.Testing.Analyzers</PackageId>
+    <AssemblyName>Cntryl.Conventions.Testing.Analyzers</AssemblyName>
+    <RootNamespace>Cntryl.Conventions.Testing.Analyzers</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

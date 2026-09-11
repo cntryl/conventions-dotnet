@@ -1,9 +1,9 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/Conventions.Analyzers/Conventions.Analyzers.csproj" />
-    <Project Path="src/Conventions.CodeFixes/Conventions.CodeFixes.csproj" />
+    <Project Path="src/Conventions.Testing.Analyzers/Conventions.Testing.Analyzers.csproj" />
+    <Project Path="src/Conventions.Testing.CodeFixes/Conventions.Testing.CodeFixes.csproj" />
   </Folder>
   <Folder Name="/test/">
-    <Project Path="test/Conventions.Tests/Conventions.Tests.csproj" />
+    <Project Path="test/Conventions.Testing.Analyzers.Tests/Conventions.Testing.Analyzers.Tests.csproj" />
   </Folder>
 </Solution>

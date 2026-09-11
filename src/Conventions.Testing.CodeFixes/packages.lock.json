@@ -223,7 +223,7 @@
           "System.Runtime.CompilerServices.Unsafe": "6.1.0"
         }
       },
-      "Cntryl.Conventions.Analyzers": {
+      "Cntryl.Conventions.Testing.Analyzers": {
         "type": "Project"
       },
       "Microsoft.CodeAnalysis.CSharp": {

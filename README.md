@@ -1,4 +1,4 @@
-# Cntryl.Conventions
+# Cntryl.Conventions.Testing
 
 Roslyn analyzers and code fixes that enforce the team's test conventions.
 
@@ -28,8 +28,8 @@ your `NuGet.Config`:
 Then reference them from the test project only:
 
 ```
-dotnet add package Cntryl.Conventions.Analyzers
-dotnet add package Cntryl.Conventions.CodeFixes
+dotnet add package Cntryl.Conventions.Testing.Analyzers
+dotnet add package Cntryl.Conventions.Testing.CodeFixes
 ```
 
 Both are development dependencies; neither adds a runtime reference.

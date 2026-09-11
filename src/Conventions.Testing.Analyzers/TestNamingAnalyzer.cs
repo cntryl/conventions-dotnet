@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace Cntryl.Conventions.Analyzers;
+namespace Cntryl.Conventions.Testing.Analyzers;
 
 /// <summary>
 /// Reports test methods whose names do not read as Should&lt;Outcome&gt;Given&lt;State&gt;When&lt;Action&gt;.

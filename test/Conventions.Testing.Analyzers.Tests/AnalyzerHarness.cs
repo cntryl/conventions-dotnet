@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 
-namespace Cntryl.Conventions.Tests;
+namespace Cntryl.Conventions.Testing.Tests;
 
 /// <summary>
 /// Compiles a snippet against a minimal xUnit-shaped stub and runs analyzers or code fixes over it.

@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <AssemblyName>Cntryl.Conventions.Tests</AssemblyName>
-    <RootNamespace>Cntryl.Conventions.Tests</RootNamespace>
+    <AssemblyName>Cntryl.Conventions.Testing.Tests</AssemblyName>
+    <RootNamespace>Cntryl.Conventions.Testing.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,8 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Conventions.Analyzers/Conventions.Analyzers.csproj"/>
-    <ProjectReference Include="../../src/Conventions.CodeFixes/Conventions.CodeFixes.csproj"/>
+    <ProjectReference Include="../../src/Conventions.Testing.Analyzers/Conventions.Testing.Analyzers.csproj"/>
+    <ProjectReference Include="../../src/Conventions.Testing.CodeFixes/Conventions.Testing.CodeFixes.csproj"/>
   </ItemGroup>
 
 </Project>
