@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -35,39 +34,44 @@ public sealed class TestStructureAnalyzer : DiagnosticAnalyzer
                 return;
             }
 
-            compilationStart.RegisterSyntaxNodeAction(
-                nodeContext => Analyze(nodeContext, detection),
-                SyntaxKind.MethodDeclaration);
+            // A symbol action rides on attribute binding the compiler performs anyway, whereas a
+            // syntax-node action would force a semantic model and per-node binding the build
+            // otherwise never needs. The body is reached through the declaring syntax instead.
+            compilationStart.RegisterSymbolAction(
+                symbolContext => Analyze(symbolContext, detection),
+                SymbolKind.Method);
         });
     }
 
-    static void Analyze(SyntaxNodeAnalysisContext context, TestMethodDetection detection)
+    static void Analyze(SymbolAnalysisContext context, TestMethodDetection detection)
     {
-        var declaration = (MethodDeclarationSyntax)context.Node;
-
-        // An expression-bodied test has no statement sequence to phase.
-        if (declaration.Body is not { } body)
+        if (context.Symbol is not IMethodSymbol method || !detection.IsTestMethod(method))
         {
             return;
         }
 
-        if (context.SemanticModel.GetDeclaredSymbol(declaration, context.CancellationToken) is not { } method ||
-            !detection.IsTestMethod(method))
+        // Each part of a partial method arrives as its own symbol carrying the merged attributes,
+        // so the part without a body simply reports nothing.
+        foreach (var reference in method.DeclaringSyntaxReferences)
         {
-            return;
-        }
+            // An expression-bodied test has no statement sequence to phase.
+            if (reference.GetSyntax(context.CancellationToken) is not MethodDeclarationSyntax { Body: { } body } declaration)
+            {
+                continue;
+            }
 
-        var (arrangeAt, actAt, assertAt) = TestPhaseComments.Locate(body);
-        var problems = TestPhaseComments.Violations(arrangeAt, actAt, assertAt);
-        if (problems.Count == 0)
-        {
-            return;
-        }
+            var (arrangeAt, actAt, assertAt) = TestPhaseComments.Locate(body);
+            var problems = TestPhaseComments.Violations(arrangeAt, actAt, assertAt);
+            if (problems.Count == 0)
+            {
+                continue;
+            }
 
-        context.ReportDiagnostic(Diagnostic.Create(
-            ConventionDiagnostics.TestStructure,
-            declaration.Identifier.GetLocation(),
-            declaration.Identifier.ValueText,
-            string.Join("; and ", problems)));
+            context.ReportDiagnostic(Diagnostic.Create(
+                ConventionDiagnostics.TestStructure,
+                declaration.Identifier.GetLocation(),
+                declaration.Identifier.ValueText,
+                string.Join("; and ", problems)));
+        }
     }
 }

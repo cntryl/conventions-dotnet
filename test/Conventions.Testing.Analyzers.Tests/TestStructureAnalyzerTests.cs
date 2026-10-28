@@ -92,6 +92,38 @@ public sealed class TestStructureAnalyzerTests
     }
 
     [Fact]
+    public async Task ShouldReportOnceGivenPartialTestMethodWhenAnalyzing()
+    {
+        // Arrange
+        const string source = """
+            using Xunit;
+
+            public partial class Sample
+            {
+                [Fact]
+                partial void ShouldDoubleValueGivenOneWhenMultiplying();
+            }
+
+            public partial class Sample
+            {
+                partial void ShouldDoubleValueGivenOneWhenMultiplying()
+                {
+                    var value = 1;
+                    var doubled = value * 2;
+                    Assert.Equal(2, doubled);
+                }
+            }
+            """;
+
+        // Act
+        var diagnostics = await AnalyzerHarness.GetDiagnosticsAsync(source, new TestStructureAnalyzer());
+
+        // Assert
+        var diagnostic = Assert.Single(diagnostics);
+        Assert.Equal(ConventionDiagnostics.TestStructureId, diagnostic.Id);
+    }
+
+    [Fact]
     public async Task ShouldInsertPhaseCommentsGivenLocatableAssertionWhenApplyingFix()
     {
         // Arrange

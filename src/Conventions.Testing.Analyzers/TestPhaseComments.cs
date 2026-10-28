@@ -58,6 +58,11 @@ public static class TestPhaseComments
             {
                 actAt = position;
             }
+
+            if (arrangeAt >= 0 && actAt >= 0 && assertAt >= 0)
+            {
+                break;
+            }
         }
 
         return (arrangeAt, actAt, assertAt);
