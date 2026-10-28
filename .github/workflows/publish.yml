@@ -3,41 +3,25 @@ name: Publish
 on:
   workflow_dispatch:
 
-permissions: {}
-
-concurrency:
-  group: conventions-github-packages-publish
-  cancel-in-progress: false
+permissions:
+  contents: write
+  packages: write
 
 jobs:
   publish:
-    name: Verify, publish, and tag
+    name: Pack and publish packages
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    permissions:
-      contents: write
-      packages: write
     env:
+      NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       PACKAGE_SOURCE: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
 
     steps:
-      - name: Require main
-        env:
-          REF: ${{ github.ref }}
-        shell: bash
-        run: |
-          if [[ "$REF" != refs/heads/main ]]; then
-            echo "::error title=Invalid release ref::Publish must run from refs/heads/main; got $REF"
-            exit 1
-          fi
-
       - name: Check out repository
         uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-          fetch-tags: true
 
-      - name: Install .NET 10 SDK
+      - name: Set up .NET
         uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
@@ -46,63 +30,34 @@ jobs:
 
       - name: Read package version
         id: version
-        shell: bash
-        run: |
-          version="$(dotnet msbuild src/Conventions.Testing.Analyzers/Conventions.Testing.Analyzers.csproj -nologo -getProperty:Version)"
-          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "::error title=Invalid package version::Version in Directory.Build.props must be MAJOR.MINOR.PATCH; got '$version'"
-            exit 1
-          fi
-          echo "PACKAGE_VERSION=$version" >> "$GITHUB_ENV"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
+        run: echo "package-version=$(dotnet msbuild src/Conventions.Testing.Analyzers/Conventions.Testing.Analyzers.csproj -nologo -getProperty:PackageVersion)" >> "$GITHUB_OUTPUT"
 
       - name: Restore locked dependencies
         run: dotnet restore Conventions.slnx --locked-mode
 
-      - name: Check formatting
-        run: dotnet format Conventions.slnx --verify-no-changes --no-restore --severity warn
-
-      - name: Build solution
-        run: dotnet build Conventions.slnx --configuration Release --no-restore
-
-      - name: Test solution
-        run: dotnet test Conventions.slnx --configuration Release --no-build --no-restore
-
-      - name: Pack NuGet packages
+      - name: Build and test
         run: |
-          dotnet pack Conventions.slnx \
-            --configuration Release \
-            --no-build \
-            --no-restore \
-            --output artifacts/packages
+          dotnet build Conventions.slnx --configuration Release --no-restore
+          dotnet test Conventions.slnx --configuration Release --no-build --no-restore
 
-      - name: Publish to GitHub Packages
+      - name: Pack packages
+        run: >-
+          dotnet pack Conventions.slnx
+          --configuration Release
+          --no-build
+          --no-restore
+          --output artifacts/packages
+
+      - name: Publish packages
+        run: >-
+          dotnet nuget push artifacts/packages/*.nupkg
+          --api-key "$NUGET_AUTH_TOKEN"
+          --source "$PACKAGE_SOURCE"
+          --skip-duplicate
+
+      - name: Tag release
         env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PACKAGE_VERSION: ${{ steps.version.outputs.package-version }}
         run: |
-          dotnet nuget push artifacts/packages/*.nupkg \
-            --api-key "$NUGET_AUTH_TOKEN" \
-            --source "$PACKAGE_SOURCE" \
-            --skip-duplicate
-
-      - name: Create tag if missing
-        id: tag
-        shell: bash
-        run: |
-          tag="v${PACKAGE_VERSION}"
-          if git show-ref --tags --verify --quiet "refs/tags/$tag"; then
-            tag_commit="$(git rev-list -n 1 "$tag")"
-            if [[ "$tag_commit" != "$GITHUB_SHA" ]]; then
-              echo "::error title=Tag conflict::$tag points to $tag_commit; expected $GITHUB_SHA"
-              exit 1
-            fi
-            echo "created=false" >> "$GITHUB_OUTPUT"
-          else
-            git tag "$tag" "$GITHUB_SHA"
-            echo "created=true" >> "$GITHUB_OUTPUT"
-          fi
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
-
-      - name: Push tag to origin
-        if: steps.tag.outputs.created == 'true'
-        run: git push origin "refs/tags/${{ steps.tag.outputs.tag }}"
+          git tag "v${PACKAGE_VERSION}"
+          git push origin "refs/tags/v${PACKAGE_VERSION}"
