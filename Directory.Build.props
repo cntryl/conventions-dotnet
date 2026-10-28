@@ -13,6 +13,9 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Deterministic>true</Deterministic>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <!-- The single source of truth for the package version. Bump it by hand on each release. -->
+    <Version>1.0.1</Version>
+    <!-- Fixed assembly identity; the package version above changes, this does not. -->
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
   </PropertyGroup>

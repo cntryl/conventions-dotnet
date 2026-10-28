@@ -10,21 +10,14 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  version:
-    uses: ./.github/workflows/version.yml
-    permissions:
-      contents: read
-
   publish:
     name: Verify, publish, and tag
-    needs: version
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
       contents: write
       packages: write
     env:
-      PACKAGE_VERSION: ${{ needs.version.outputs.semver }}
       PACKAGE_SOURCE: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
 
     steps:
@@ -51,13 +44,17 @@ jobs:
           cache: true
           cache-dependency-path: '**/packages.lock.json'
 
-      - name: Validate package version
+      - name: Read package version
+        id: version
         shell: bash
         run: |
-          if [[ ! "$PACKAGE_VERSION" =~ ^1\.0\.[0-9]+$ ]]; then
-            echo "::error title=Invalid package version::Expected 1.0.x, got $PACKAGE_VERSION"
+          version="$(dotnet msbuild src/Conventions.Testing.Analyzers/Conventions.Testing.Analyzers.csproj -nologo -getProperty:Version)"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error title=Invalid package version::Version in Directory.Build.props must be MAJOR.MINOR.PATCH; got '$version'"
             exit 1
           fi
+          echo "PACKAGE_VERSION=$version" >> "$GITHUB_ENV"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Restore locked dependencies
         run: dotnet restore Conventions.slnx --locked-mode
@@ -77,8 +74,7 @@ jobs:
             --configuration Release \
             --no-build \
             --no-restore \
-            --output artifacts/packages \
-            -p:PackageVersion="$PACKAGE_VERSION"
+            --output artifacts/packages
 
       - name: Publish to GitHub Packages
         env:

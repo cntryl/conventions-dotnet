@@ -11,10 +11,6 @@
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <IncludeSymbols>false</IncludeSymbols>
     <DevelopmentDependency>true</DevelopmentDependency>
-    <!-- Overridden by the publish workflow with the GitVersion semver. -->
-    <PackageVersion>1.0.0</PackageVersion>
-    <Version>$(PackageVersion)</Version>
-    <InformationalVersion>$(PackageVersion)</InformationalVersion>
     <Authors>cntryl</Authors>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/cntryl/conventions-dotnet</PackageProjectUrl>
