@@ -36,9 +36,6 @@ jobs:
       - name: Test
         run: dotnet test Conventions.slnx -c Release --no-build --no-restore
 
-      - name: Pack NuGet packages
-        run: dotnet pack Conventions.slnx -c Release --no-build --no-restore --output artifacts/packages
-
       - name: Set up minimum supported .NET SDK
         uses: actions/setup-dotnet@v6
         with:
@@ -48,9 +45,3 @@ jobs:
         run: |
           dotnet --version
           dotnet build Conventions.slnx -c Release
-
-      - name: Upload NuGet packages
-        uses: actions/upload-artifact@v7
-        with:
-          name: conventions-dotnet-packages
-          path: artifacts/packages
