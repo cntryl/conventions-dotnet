@@ -16,6 +16,9 @@ public static class ConventionDiagnostics
     /// <summary>Diagnostic property carrying a mechanically derived replacement name.</summary>
     public const string SuggestedNameProperty = "SuggestedName";
 
+    /// <summary>Diagnostic property recording whether a phase marker already exists in the body.</summary>
+    public const string HasPhaseMarkersProperty = "HasPhaseMarkers";
+
     internal static readonly DiagnosticDescriptor TestNaming = new(
         TestNamingId,
         "Test name does not follow Should/Given/When",

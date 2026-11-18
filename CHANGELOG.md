@@ -6,6 +6,26 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.0.2]
+
+### Changed
+
+- Builds and tests use .NET 11, Roslyn 5.12 and xUnit v3 on Microsoft.Testing.Platform.
+  The packages require a Roslyn 5.12 or newer compiler or IDE. Restores use central package
+  versions without NuGet lock files.
+- Naming analysis caches options per source tree and avoids allocating a violation list
+  for conforming names. A partial test gets one naming diagnostic at its defining declaration.
+- Phase analysis verifies comment candidates against C# syntax. The fixer reuses the analyzer's
+  marker information and batches eligible edits per document during Fix All.
+
+### Fixed
+
+- Both rules recognize test frameworks referenced through an extern alias. Naming validation
+  reports empty outcomes, preconditions and actions between adjacent clause keywords.
+- Naming Fix All handles distinct replacement names, updates references and checks same-type
+  member conflicts. The structure fix preserves line endings and indentation and recognizes
+  qualified framework assertions.
+
 ## [1.0.1]
 
 ### Changed
@@ -30,6 +50,7 @@ All notable changes to this project are documented here. The format follows
 - xUnit, NUnit and MSTest attribute detection. Both analyzers stay inert in projects that
   reference no supported test framework.
 
-[Unreleased]: https://github.com/cntryl/conventions-dotnet/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/cntryl/conventions-dotnet/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/cntryl/conventions-dotnet/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/cntryl/conventions-dotnet/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/cntryl/conventions-dotnet/releases/tag/v1.0.0

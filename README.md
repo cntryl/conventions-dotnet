@@ -9,6 +9,9 @@ Roslyn analyzers and code fixes that enforce the team's test conventions.
 
 Both rules detect xUnit, NUnit and MSTest, and stay inert in projects that reference none of them.
 
+Build this repository with the .NET 11 SDK or later. The compiler and IDE must host Roslyn
+5.12 or later to load these packages.
+
 ## Install
 
 Both packages are published to GitHub Packages, not nuget.org. Add the `cntryl` source to
@@ -28,11 +31,11 @@ your `NuGet.Config`:
 Then reference them from the test project only:
 
 ```
-dotnet add package Cntryl.Conventions.Testing.Analyzers
-dotnet add package Cntryl.Conventions.Testing.CodeFixes
+dotnet package add Cntryl.Conventions.Testing.Analyzers
+dotnet package add Cntryl.Conventions.Testing.CodeFixes
 ```
 
-Both are development dependencies; neither adds a runtime reference.
+Both are development dependencies and add no runtime reference.
 
 ## Configure
 
@@ -61,3 +64,7 @@ assertion found, or fewer than three statements — no fix is offered rather tha
 (`AcceptsValidRoute` → `ShouldAcceptValidRoute`), via `Renamer` so references update. A
 missing `Given` or `When` clause states intent that is absent from the source, so no fix is
 offered for it.
+
+Fix All updates references when renaming tests and checks for conflicting member signatures.
+The structure fix preserves the source file's indentation and line endings and skips methods
+that already have a phase marker.

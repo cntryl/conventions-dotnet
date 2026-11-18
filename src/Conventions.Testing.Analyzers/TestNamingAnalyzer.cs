@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -40,35 +40,39 @@ public sealed class TestNamingAnalyzer : DiagnosticAnalyzer
                 return;
             }
 
-            compilationStart.RegisterSymbolAction(
-                symbolContext => Analyze(symbolContext, detection),
-                SymbolKind.Method);
+            var provider = compilationStart.Options.AnalyzerConfigOptionsProvider;
+            var optionsByTree = new ConcurrentDictionary<SyntaxTree, (bool RequireGiven, bool RequireWhen)>();
+            Func<SyntaxTree, (bool, bool)> readOptions = tree =>
+            {
+                var options = provider.GetOptions(tree);
+                return (ReadFlag(options, RequireGivenOption, true), ReadFlag(options, RequireWhenOption, false));
+            };
+            compilationStart.RegisterSymbolAction(context =>
+            {
+                var method = (IMethodSymbol)context.Symbol;
+                // The defining declaration owns the name and its file's naming options.
+                if (!detection.IsTestMethod(method) || method.PartialDefinitionPart is not null)
+                {
+                    return;
+                }
+
+                var location = method.Locations[0];
+                var (requireGiven, requireWhen) = optionsByTree.GetOrAdd(location.SourceTree!, readOptions);
+                Analyze(context, method.Name, location, requireGiven, requireWhen);
+            }, SymbolKind.Method);
         });
     }
 
-    static void Analyze(SymbolAnalysisContext context, TestMethodDetection detection)
+    static void Analyze(SymbolAnalysisContext context, string name, Location location, bool requireGiven, bool requireWhen)
     {
-        if (context.Symbol is not IMethodSymbol method || !detection.IsTestMethod(method))
-        {
-            return;
-        }
-
-        var location = method.Locations.Length > 0 ? method.Locations[0] : Location.None;
-        var options = location.SourceTree is null
-            ? null
-            : context.Options.AnalyzerConfigOptionsProvider.GetOptions(location.SourceTree);
-
-        var requireGiven = ReadFlag(options, RequireGivenOption, defaultValue: true);
-        var requireWhen = ReadFlag(options, RequireWhenOption, defaultValue: false);
-
-        var problems = TestNameGrammar.Violations(method.Name, requireGiven, requireWhen);
+        var problems = TestNameGrammar.Violations(name, requireGiven, requireWhen);
         if (problems.Count == 0)
         {
             return;
         }
 
         var properties = ImmutableDictionary<string, string?>.Empty;
-        var suggested = TestNameGrammar.TryDeriveShouldName(method.Name);
+        var suggested = problems.Count == 1 ? TestNameGrammar.TryDeriveShouldName(name) : null;
         if (suggested is not null && TestNameGrammar.Violations(suggested, requireGiven, requireWhen).Count == 0)
         {
             properties = properties.Add(ConventionDiagnostics.SuggestedNameProperty, suggested);
@@ -78,29 +82,13 @@ public sealed class TestNamingAnalyzer : DiagnosticAnalyzer
             ConventionDiagnostics.TestNaming,
             location,
             properties,
-            method.Name,
-            Describe(problems)));
+            name,
+            problems.Count == 1 ? problems[0] : string.Join("; and ", problems)));
     }
 
-    static string Describe(IReadOnlyList<string> problems)
+    static bool ReadFlag(AnalyzerConfigOptions options, string key, bool defaultValue)
     {
-        if (problems.Count == 1)
-        {
-            return problems[0];
-        }
-
-        var parts = new string[problems.Count];
-        for (var i = 0; i < problems.Count; i++)
-        {
-            parts[i] = problems[i];
-        }
-
-        return string.Join("; and ", parts);
-    }
-
-    static bool ReadFlag(AnalyzerConfigOptions? options, string key, bool defaultValue)
-    {
-        if (options is not null && options.TryGetValue(key, out var raw) && bool.TryParse(raw, out var parsed))
+        if (options.TryGetValue(key, out var raw) && bool.TryParse(raw, out var parsed))
         {
             return parsed;
         }

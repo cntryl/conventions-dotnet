@@ -32,11 +32,7 @@ sealed class TestMethodDetection
         var builder = ImmutableArray.CreateBuilder<INamedTypeSymbol>();
         foreach (var metadataName in AttributeMetadataNames)
         {
-            var symbol = compilation.GetTypeByMetadataName(metadataName);
-            if (symbol is not null)
-            {
-                builder.Add(symbol);
-            }
+            builder.AddRange(compilation.GetTypesByMetadataName(metadataName));
         }
 
         return new TestMethodDetection(builder.ToImmutable());
@@ -44,7 +40,7 @@ sealed class TestMethodDetection
 
     internal bool IsTestMethod(IMethodSymbol method)
     {
-        if (_attributes.IsEmpty || method.MethodKind != MethodKind.Ordinary)
+        if (method.MethodKind != MethodKind.Ordinary)
         {
             return false;
         }
