@@ -1,20 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <AssemblyName>Cntryl.Conventions.Testing.Tests</AssemblyName>
     <RootNamespace>Cntryl.Conventions.Testing.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk"/>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces"/>
-    <PackageReference Include="xunit"/>
-    <PackageReference Include="xunit.runner.visualstudio"/>
-    <PackageReference Include="coverlet.collector"/>
+    <PackageReference Include="xunit.v3"/>
+    <PackageReference Include="coverlet.MTP"/>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Conventions.Testing.Analyzers/Conventions.Testing.Analyzers.csproj"/>
+    <ProjectReference Include="../../src/Conventions.Testing.Analyzers/Conventions.Testing.Analyzers.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="true"/>
     <ProjectReference Include="../../src/Conventions.Testing.CodeFixes/Conventions.Testing.CodeFixes.csproj"/>
   </ItemGroup>
 

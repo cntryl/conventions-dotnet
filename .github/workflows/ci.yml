@@ -20,12 +20,14 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: "10.0.x"
+          dotnet-version: "11.0.x"
           cache: true
-          cache-dependency-path: '**/packages.lock.json'
+          cache-dependency-path: |
+            Directory.Packages.props
+            **/*.csproj
 
-      - name: Restore locked dependencies
-        run: dotnet restore Conventions.slnx --locked-mode
+      - name: Restore dependencies
+        run: dotnet restore Conventions.slnx
 
       - name: Check formatting
         run: dotnet format Conventions.slnx --verify-no-changes --no-restore --severity warn
@@ -34,14 +36,24 @@ jobs:
         run: dotnet build Conventions.slnx -c Release --no-restore
 
       - name: Test
-        run: dotnet test Conventions.slnx -c Release --no-build --no-restore
+        run: dotnet test --solution Conventions.slnx -c Release --no-build --no-restore
 
-      - name: Set up minimum supported .NET SDK
+      - name: Install minimum supported compiler
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: "10.0.100"
+          dotnet-version: "11.0.100"
 
-      - name: Verify analyzers load on the minimum supported compiler
+      - name: Verify both rules run on the minimum compiler
+        shell: bash
         run: |
-          dotnet --version
-          dotnet build Conventions.slnx -c Release
+          cat > "$RUNNER_TEMP/Smoke.cs" <<'CS'
+          namespace Xunit { public sealed class FactAttribute : System.Attribute { } }
+          class Smoke { [Xunit.Fact] public void Broken() { } }
+          CS
+          dotnet "$DOTNET_ROOT/sdk/11.0.100/Roslyn/bincore/csc.dll" \
+            -nologo -target:library -out:"$RUNNER_TEMP/Smoke.dll" \
+            -reference:"$DOTNET_ROOT/packs/Microsoft.NETCore.App.Ref/11.0.0/ref/net11.0/System.Runtime.dll" \
+            -analyzer:src/Conventions.Testing.Analyzers/bin/Release/netstandard2.0/Cntryl.Conventions.Testing.Analyzers.dll \
+            -warnaserror -warnaserror-:CNTRYL0001,CNTRYL0002 "$RUNNER_TEMP/Smoke.cs" | tee "$RUNNER_TEMP/compiler.log"
+          grep -F 'warning CNTRYL0001:' "$RUNNER_TEMP/compiler.log"
+          grep -F 'warning CNTRYL0002:' "$RUNNER_TEMP/compiler.log"

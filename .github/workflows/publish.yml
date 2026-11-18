@@ -24,21 +24,23 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 11.0.x
           cache: true
-          cache-dependency-path: '**/packages.lock.json'
+          cache-dependency-path: |
+            Directory.Packages.props
+            **/*.csproj
 
       - name: Read package version
         id: version
         run: echo "package-version=$(dotnet msbuild src/Conventions.Testing.Analyzers/Conventions.Testing.Analyzers.csproj -nologo -getProperty:PackageVersion)" >> "$GITHUB_OUTPUT"
 
-      - name: Restore locked dependencies
-        run: dotnet restore Conventions.slnx --locked-mode
+      - name: Restore dependencies
+        run: dotnet restore Conventions.slnx
 
       - name: Build and test
         run: |
           dotnet build Conventions.slnx --configuration Release --no-restore
-          dotnet test Conventions.slnx --configuration Release --no-build --no-restore
+          dotnet test --solution Conventions.slnx --configuration Release --no-build --no-restore
 
       - name: Pack packages
         run: >-
