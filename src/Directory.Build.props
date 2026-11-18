@@ -2,7 +2,7 @@
   <Import Project="../Directory.Build.props"/>
 
   <PropertyGroup>
-    <!-- Roslyn components load into the compiler, which targets netstandard2.0. -->
+    <!-- Roslyn extensions target netstandard2.0 for compiler and IDE host loading. -->
     <TargetFramework>netstandard2.0</TargetFramework>
     <IsPackable>true</IsPackable>
     <IsRoslynComponent>true</IsRoslynComponent>
@@ -24,9 +24,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Shared/TestVerbInflection.cs" Link="Shared/TestVerbInflection.cs"/>
     <None Include="$(MSBuildThisFileDirectory)../README.md" Pack="true" PackagePath="/"/>
-    <AdditionalFiles Include="$(MSBuildProjectDirectory)/AnalyzerReleases.Shipped.md"/>
-    <AdditionalFiles Include="$(MSBuildProjectDirectory)/AnalyzerReleases.Unshipped.md"/>
     <None Include="$(OutputPath)$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
   </ItemGroup>
 </Project>

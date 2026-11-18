@@ -1,8 +1,11 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Cntryl.Conventions.Testing.Analyzers;
 
@@ -11,6 +14,9 @@ namespace Cntryl.Conventions.Testing.Analyzers;
 /// </summary>
 public static class TestPhaseComments
 {
+    static readonly IReadOnlyList<string> AllMissing = Array.AsReadOnly(
+        new[] { "is missing '// Arrange', '// Act', '// Assert'" });
+
     /// <summary>The comment that opens the arrange phase.</summary>
     public const string Arrange = "// Arrange";
 
@@ -24,48 +30,93 @@ public static class TestPhaseComments
     /// Returns the source position of each phase marker in <paramref name="body"/>, or -1 when absent.
     /// A marker may carry trailing prose, so <c>// Arrange: two subscribers</c> counts as arrange.
     /// </summary>
-    public static (int ArrangeAt, int ActAt, int AssertAt) Locate(BlockSyntax body)
+    public static (int ArrangeAt, int ActAt, int AssertAt) Locate(BlockSyntax body) =>
+        Scan(body, CancellationToken.None);
+
+    /// <inheritdoc cref="Locate(BlockSyntax)"/>
+    internal static (int ArrangeAt, int ActAt, int AssertAt) Scan(BlockSyntax body, CancellationToken cancellationToken)
     {
         if (body is null)
         {
             throw new ArgumentNullException(nameof(body));
         }
 
-        var arrangeAt = -1;
-        var actAt = -1;
-        var assertAt = -1;
-
-        foreach (var trivia in body.DescendantTrivia())
+        cancellationToken.ThrowIfCancellationRequested();
+        var markers = (ArrangeAt: -1, ActAt: -1, AssertAt: -1);
+        // Small methods are cheaper to search as text. Confirm every candidate against Roslyn
+        // so strings, disabled code, and other trivia cannot masquerade as phase comments.
+        var span = body.Span;
+        var triviaSpan = span;
+        if (span.Length <= 4096 && body.SyntaxTree.TryGetText(out var text))
         {
-            if (!trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
+            var buffer = ArrayPool<char>.Shared.Rent(span.Length);
+            try
             {
-                continue;
-            }
+                text.CopyTo(span.Start, buffer, 0, span.Length);
+                var start = 0;
+                while (true)
+                {
+                    var index = buffer.AsSpan(start, span.Length - start).IndexOf("// A".AsSpan());
+                    if (index < 0)
+                    {
+                        return markers;
+                    }
 
-            var text = trivia.ToString().Trim();
-            var position = trivia.SpanStart;
+                    cancellationToken.ThrowIfCancellationRequested();
+                    var position = span.Start + start + index;
+                    var trivia = body.FindTrivia(position);
+                    if (trivia.SpanStart != position || !trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
+                    {
+                        // One literal or disabled block can contain many apparent markers.
+                        // Let Roslyn skip it as a unit instead of resolving each match.
+                        triviaSpan = TextSpan.FromBounds(position, span.End);
+                        break;
+                    }
 
-            // Assert is tested before Act because "// Assert" also starts with "// As".
-            if (assertAt < 0 && Matches(text, Assert))
-            {
-                assertAt = position;
-            }
-            else if (arrangeAt < 0 && Matches(text, Arrange))
-            {
-                arrangeAt = position;
-            }
-            else if (actAt < 0 && Matches(text, Act))
-            {
-                actAt = position;
-            }
+                    if (RecordMarker(trivia, ref markers))
+                    {
+                        return markers;
+                    }
 
-            if (arrangeAt >= 0 && actAt >= 0 && assertAt >= 0)
+                    start = trivia.Span.End - span.Start;
+                }
+            }
+            finally
+            {
+                ArrayPool<char>.Shared.Return(buffer);
+            }
+        }
+
+        // A large literal contributes only a single token to the syntax walk.
+        foreach (var trivia in body.DescendantTrivia(triviaSpan))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia) && RecordMarker(trivia, ref markers))
             {
                 break;
             }
         }
 
-        return (arrangeAt, actAt, assertAt);
+        return markers;
+    }
+
+    static bool RecordMarker(SyntaxTrivia trivia, ref (int ArrangeAt, int ActAt, int AssertAt) markers)
+    {
+        var text = trivia.ToString();
+        if (markers.ArrangeAt < 0 && Matches(text, Arrange))
+        {
+            markers.ArrangeAt = trivia.SpanStart;
+        }
+        else if (markers.ActAt < 0 && Matches(text, Act))
+        {
+            markers.ActAt = trivia.SpanStart;
+        }
+        else if (markers.AssertAt < 0 && Matches(text, Assert))
+        {
+            markers.AssertAt = trivia.SpanStart;
+        }
+
+        return markers.ArrangeAt >= 0 && markers.ActAt >= 0 && markers.AssertAt >= 0;
     }
 
     /// <summary>
@@ -74,6 +125,16 @@ public static class TestPhaseComments
     /// </summary>
     public static IReadOnlyList<string> Violations(int arrangeAt, int actAt, int assertAt)
     {
+        if (arrangeAt >= 0 && arrangeAt <= actAt && actAt <= assertAt)
+        {
+            return Array.Empty<string>();
+        }
+
+        if (arrangeAt < 0 && actAt < 0 && assertAt < 0)
+        {
+            return AllMissing;
+        }
+
         var problems = new List<string>();
         var missing = new List<string>();
 

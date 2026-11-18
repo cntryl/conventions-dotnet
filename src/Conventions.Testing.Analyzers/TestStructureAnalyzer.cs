@@ -12,6 +12,11 @@ namespace Cntryl.Conventions.Testing.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class TestStructureAnalyzer : DiagnosticAnalyzer
 {
+    static readonly ImmutableDictionary<string, string?> WithoutMarkers =
+        ImmutableDictionary<string, string?>.Empty.Add(ConventionDiagnostics.HasPhaseMarkersProperty, "false");
+    static readonly ImmutableDictionary<string, string?> WithMarkers =
+        ImmutableDictionary<string, string?>.Empty.Add(ConventionDiagnostics.HasPhaseMarkersProperty, "true");
+
     /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         [ConventionDiagnostics.TestStructure];
@@ -60,7 +65,7 @@ public sealed class TestStructureAnalyzer : DiagnosticAnalyzer
                 continue;
             }
 
-            var (arrangeAt, actAt, assertAt) = TestPhaseComments.Locate(body);
+            var (arrangeAt, actAt, assertAt) = TestPhaseComments.Scan(body, context.CancellationToken);
             var problems = TestPhaseComments.Violations(arrangeAt, actAt, assertAt);
             if (problems.Count == 0)
             {
@@ -70,8 +75,9 @@ public sealed class TestStructureAnalyzer : DiagnosticAnalyzer
             context.ReportDiagnostic(Diagnostic.Create(
                 ConventionDiagnostics.TestStructure,
                 declaration.Identifier.GetLocation(),
+                arrangeAt < 0 && actAt < 0 && assertAt < 0 ? WithoutMarkers : WithMarkers,
                 declaration.Identifier.ValueText,
-                string.Join("; and ", problems)));
+                problems.Count == 1 ? problems[0] : string.Join("; and ", problems)));
         }
     }
 }
