@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.0.5]
+
+### Fixed
+
+- `CNTRYL1002` code fixes now insert exactly one blank line at each control-flow boundary,
+  including adjacent control-flow statements.
+- Malformed declaration parameter lists are ignored and not rewritten.
+
 ## [1.0.4]
 
 ### Added
