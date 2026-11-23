@@ -39,6 +39,11 @@ public sealed class DeclarationWrappingAnalyzer : DiagnosticAnalyzer
             return;
         }
 
+        if (parameterList.ContainsDiagnostics)
+        {
+            return;
+        }
+
         var parent = parameterList.Parent;
         if (parent is not (MethodDeclarationSyntax or ConstructorDeclarationSyntax or LocalFunctionStatementSyntax or
             DelegateDeclarationSyntax))

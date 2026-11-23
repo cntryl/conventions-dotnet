@@ -59,7 +59,7 @@ public sealed class ControlFlowSpacingCodeFixProvider : CodeFixProvider
         var statementStartLine = text.Lines.GetLineFromPosition(statement.SpanStart);
         var statementStart = statementStartLine.Start;
 
-        var insertions = new System.Collections.Generic.Dictionary<int, string>();
+        var insertions = new System.Collections.Generic.Dictionary<int, int>();
         if (statement.Parent is BlockSyntax block)
         {
             var index = block.Statements.IndexOf(statement);
@@ -68,10 +68,7 @@ public sealed class ControlFlowSpacingCodeFixProvider : CodeFixProvider
                 var boundary = statementStart;
                 var previousLine = text.Lines.GetLineFromPosition(block.Statements[index - 1].Span.End).LineNumber;
                 var statementLine = text.Lines.GetLineFromPosition(statementStart).LineNumber;
-                var newLine = GetNewLine(text);
-                insertions[boundary] = previousLine == statementLine
-                    ? newLine + newLine
-                    : newLine;
+                insertions[boundary] = previousLine == statementLine ? 2 : 1;
             }
 
             if (index + 1 < block.Statements.Count)
@@ -80,10 +77,7 @@ public sealed class ControlFlowSpacingCodeFixProvider : CodeFixProvider
                     block.Statements[index + 1].SpanStart).Start;
                 var statementLine = text.Lines.GetLineFromPosition(statement.Span.End).LineNumber;
                 var nextLine = text.Lines.GetLineFromPosition(nextStart).LineNumber;
-                var newLine = GetNewLine(text);
-                insertions[nextStart] = statementLine == nextLine
-                    ? newLine + newLine
-                    : newLine;
+                insertions[nextStart] = statementLine == nextLine ? 2 : 1;
             }
         }
 
@@ -93,11 +87,12 @@ public sealed class ControlFlowSpacingCodeFixProvider : CodeFixProvider
         }
 
         var changes = new System.Collections.Generic.List<TextChange>(insertions.Count);
+        var newLine = GetNewLine(text);
         foreach (var insertion in insertions)
         {
             changes.Add(new TextChange(
                 TextSpan.FromBounds(insertion.Key, insertion.Key),
-                insertion.Value));
+                newLine + (insertion.Value == 2 ? newLine : string.Empty)));
         }
 
         var changedText = text.WithChanges(changes);

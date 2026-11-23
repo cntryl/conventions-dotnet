@@ -235,6 +235,74 @@ public sealed class DeclarationWrappingAnalyzerTests
         Assert.Contains("value++;", fixedSource);
     }
 
+    [Fact]
+    public async Task IgnoresIncompleteDeclarationParameterList()
+    {
+        // Arrange
+        const string source = """
+            class Example
+            {
+                void Execute(
+                    int first,
+                    int second
+            """;
+
+        // Act
+        var diagnostics = await GetDiagnosticsAsync(source);
+
+        // Assert
+        Assert.Empty(diagnostics);
+    }
+
+    [Fact]
+    public async Task AllowsPrimaryConstructorWrapping()
+    {
+        // Arrange
+        const string source = """
+            class Example(
+                int first,
+                int second
+            )
+            {
+            }
+            """;
+
+        // Act
+        var diagnostics = await GetDiagnosticsAsync(source);
+
+        // Assert
+        Assert.Empty(diagnostics);
+    }
+
+    [Fact]
+    public async Task FixAllProducesOneBoundaryAtAdjacentControlFlow()
+    {
+        // Arrange
+        const string source = """
+            class Example
+            {
+                void Execute(bool first, bool second)
+                {
+                    if (first) { }
+                    while (second) { break; }
+                    var value = 1;
+                }
+            }
+            """;
+
+        // Act
+        var fixedSource = await ApplyFixAllAsync(
+            source,
+            new ControlFlowSpacingAnalyzer(),
+            new ControlFlowSpacingCodeFixProvider(),
+            ConventionDiagnostics.ControlFlowSpacingId);
+
+        // Assert
+        Assert.Contains("}\n\n", fixedSource);
+        Assert.Contains("while (second)", fixedSource);
+        Assert.DoesNotContain("\n\n\n", fixedSource);
+    }
+
     static async Task<string> ApplyFixAsync(string source, DiagnosticAnalyzer analyzer, CodeFixProvider provider, string diagnosticId)
     {
         using var workspace = new AdhocWorkspace();
@@ -272,6 +340,59 @@ public sealed class DeclarationWrappingAnalyzerTests
         return (await changedDocument.GetTextAsync(cancellationToken)).ToString();
     }
 
+    static async Task<string> ApplyFixAllAsync(string source, DiagnosticAnalyzer analyzer, CodeFixProvider provider, string diagnosticId)
+    {
+        using var workspace = new AdhocWorkspace();
+        var project = workspace.AddProject(ProjectInfo.Create(
+            ProjectId.CreateNewId(),
+            VersionStamp.Default,
+            "Snippet",
+            "Snippet",
+            LanguageNames.CSharp,
+            compilationOptions: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary),
+            metadataReferences:
+            [
+                MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+                MetadataReference.CreateFromFile(System.Reflection.Assembly.Load("System.Runtime").Location),
+            ]));
+        var document = workspace.AddDocument(project.Id, "Snippet.cs", SourceText.From(source));
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var compilation = await document.Project.GetCompilationAsync(cancellationToken);
+        Assert.NotNull(compilation);
+        var diagnostics = await compilation.WithAnalyzers(
+            [analyzer],
+            document.Project.AnalyzerOptions)
+            .GetAnalyzerDiagnosticsAsync(cancellationToken);
+        var matching = diagnostics.Where(d => d.Id == diagnosticId).ToImmutableArray();
+        Assert.NotEmpty(matching);
+        var documentDiagnostics = new DocumentDiagnostics(document.Id, matching);
+        var diagnostic = matching[0];
+        var actions = new List<CodeAction>();
+        await provider.RegisterCodeFixesAsync(new CodeFixContext(
+            document,
+            diagnostic,
+            (action, _) => actions.Add(action),
+            cancellationToken));
+        var action = Assert.Single(actions);
+
+        var fixAll = provider.GetFixAllProvider();
+        Assert.NotNull(fixAll);
+        var fixAllContext = new FixAllContext(
+            document,
+            provider,
+            FixAllScope.Document,
+            action.EquivalenceKey!,
+            [diagnosticId],
+            documentDiagnostics,
+            cancellationToken);
+        var fixAllAction = await fixAll.GetFixAsync(fixAllContext);
+        Assert.NotNull(fixAllAction);
+        var fixAllOperations = await fixAllAction.GetOperationsAsync(cancellationToken);
+        var fixedSolution = fixAllOperations.OfType<ApplyChangesOperation>().Single().ChangedSolution;
+        var fixedDocument = fixedSolution.GetDocument(document.Id)!;
+        return (await fixedDocument.GetTextAsync(cancellationToken)).ToString();
+    }
+
     static async Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync(string source, DiagnosticAnalyzer? analyzer = null)
     {
         using var workspace = new AdhocWorkspace();
@@ -294,5 +415,21 @@ public sealed class DeclarationWrappingAnalyzerTests
             [analyzer ?? new DeclarationWrappingAnalyzer()],
             document.Project.AnalyzerOptions)
             .GetAnalyzerDiagnosticsAsync(TestContext.Current.CancellationToken);
+    }
+
+    sealed class DocumentDiagnostics(DocumentId documentId, ImmutableArray<Diagnostic> diagnostics)
+        : FixAllContext.DiagnosticProvider
+    {
+        public override Task<IEnumerable<Diagnostic>> GetDocumentDiagnosticsAsync(Document document, CancellationToken cancellationToken)
+        {
+            return Task.FromResult<IEnumerable<Diagnostic>>(
+                document.Id == documentId ? diagnostics : []);
+        }
+
+        public override Task<IEnumerable<Diagnostic>> GetProjectDiagnosticsAsync(Project project, CancellationToken cancellationToken) =>
+            Task.FromResult<IEnumerable<Diagnostic>>([]);
+
+        public override Task<IEnumerable<Diagnostic>> GetAllDiagnosticsAsync(Project project, CancellationToken cancellationToken) =>
+            Task.FromResult<IEnumerable<Diagnostic>>([]);
     }
 }
