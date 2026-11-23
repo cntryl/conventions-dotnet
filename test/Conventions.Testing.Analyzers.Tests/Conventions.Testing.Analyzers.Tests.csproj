@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <AssemblyName>Cntryl.Conventions.Testing.Tests</AssemblyName>
-    <RootNamespace>Cntryl.Conventions.Testing.Tests</RootNamespace>
+    <AssemblyName>Cntryl.Conventions.Testing.Analyzers.Tests</AssemblyName>
+    <RootNamespace>Cntryl.Conventions.Testing.Analyzers.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

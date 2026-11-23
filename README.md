@@ -1,20 +1,23 @@
-# Cntryl.Conventions.Testing
+# Cntryl.Conventions
 
-Roslyn analyzers and code fixes that enforce the team's test conventions.
+Roslyn analyzers and code fixes that enforce the team's C# and test conventions.
 
 | Rule | Enforces |
 |---|---|
 | `CNTRYL0001` | Test names read as a specification: `Should<Outcome>Given<State>When<Action>` |
 | `CNTRYL0002` | Test bodies carry ordered `// Arrange`, `// Act`, `// Assert` comments |
+| `CNTRYL1001` | Wrapped declaration parameter lists are formatted atomically |
+| `CNTRYL1002` | Control-flow blocks are separated from surrounding statements by blank lines |
 
-Both rules detect xUnit, NUnit and MSTest, and stay inert in projects that reference none of them.
+The testing rules detect xUnit, NUnit and MSTest, and stay inert in projects that reference
+none of them.
 
 Build this repository with the .NET 11 SDK or later. The compiler and IDE must host Roslyn
 5.12 or later to load these packages.
 
 ## Install
 
-Both packages are published to GitHub Packages, not nuget.org. Add the `cntryl` source to
+The packages are published to GitHub Packages, not nuget.org. Add the `cntryl` source to
 your `NuGet.Config`:
 
 ```xml
@@ -28,14 +31,20 @@ your `NuGet.Config`:
 </packageSourceMapping>
 ```
 
-Then reference them from the test project only:
+Reference the general analyzer from application projects:
+
+```
+dotnet package add Cntryl.Conventions.Analyzers
+```
+
+Reference the testing analyzer and code-fix packages from test projects:
 
 ```
 dotnet package add Cntryl.Conventions.Testing.Analyzers
 dotnet package add Cntryl.Conventions.Testing.CodeFixes
 ```
 
-Both are development dependencies and add no runtime reference.
+All packages are development dependencies and add no runtime reference.
 
 ## Configure
 
@@ -49,6 +58,8 @@ conventions_test_naming_require_when  = false
 
 dotnet_diagnostic.CNTRYL0001.severity = warning
 dotnet_diagnostic.CNTRYL0002.severity = warning
+dotnet_diagnostic.CNTRYL1001.severity = warning
+dotnet_diagnostic.CNTRYL1002.severity = warning
 ```
 
 Adopting on an existing suite: start both rules at `suggestion`, then raise them to
@@ -68,3 +79,14 @@ offered for it.
 Fix All updates references when renaming tests and checks for conflicting member signatures.
 The structure fix preserves the source file's indentation and line endings and skips methods
 that already have a phase marker.
+
+## Benchmarks
+
+Run the analyzer benchmark on .NET 11:
+
+```shell
+dotnet run --project benchmark/Conventions.Analyzers.Benchmarks/Conventions.Analyzers.Benchmarks.csproj -c Release -- --filter '*'
+```
+
+The suite reports time and allocations for the general analyzers, testing analyzers, and all
+analyzers against 500 representative test methods.

@@ -6,6 +6,22 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.0.3]
+
+### Added
+
+- The general `Cntryl.Conventions.Analyzers` package with `CNTRYL1001` for atomic method and
+  constructor parameter wrapping and `CNTRYL1002` for blank lines around control-flow blocks.
+- A BenchmarkDotNet project measuring the general, testing and combined analyzer packages on
+  representative .NET 11 source.
+
+### Changed
+
+- Package metadata, project names, CI smoke coverage and README guidance now consistently cover
+  both general and test-specific conventions.
+- Phase-comment matching reads candidate marker text without allocating a string for every
+  syntax trivia match.
+
 ## [1.0.2]
 
 ### Changed
@@ -50,7 +66,8 @@ All notable changes to this project are documented here. The format follows
 - xUnit, NUnit and MSTest attribute detection. Both analyzers stay inert in projects that
   reference no supported test framework.
 
-[Unreleased]: https://github.com/cntryl/conventions-dotnet/compare/v1.0.2...HEAD
+[Unreleased]: https://github.com/cntryl/conventions-dotnet/compare/v1.0.3...HEAD
+[1.0.3]: https://github.com/cntryl/conventions-dotnet/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/cntryl/conventions-dotnet/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/cntryl/conventions-dotnet/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/cntryl/conventions-dotnet/releases/tag/v1.0.0

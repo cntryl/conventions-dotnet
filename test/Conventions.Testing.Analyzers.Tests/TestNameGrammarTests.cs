@@ -1,6 +1,6 @@
 using Cntryl.Conventions.Testing.Analyzers;
 
-namespace Cntryl.Conventions.Testing.Tests;
+namespace Cntryl.Conventions.Testing.Analyzers.Tests;
 
 public sealed class TestNameGrammarTests
 {
