@@ -21,6 +21,7 @@ All notable changes to this project are documented here. The format follows
   both general and test-specific conventions.
 - Phase-comment matching reads candidate marker text without allocating a string for every
   syntax trivia match.
+- Updated direct and transitive NuGet dependencies and central package pins.
 
 ## [1.0.2]
 
