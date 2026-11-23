@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Conventions.Analyzers/Conventions.Analyzers.csproj" />
+    <Project Path="src/Conventions.CodeFixes/Conventions.CodeFixes.csproj" />
     <Project Path="src/Conventions.Testing.Analyzers/Conventions.Testing.Analyzers.csproj" />
     <Project Path="src/Conventions.Testing.CodeFixes/Conventions.Testing.CodeFixes.csproj" />
   </Folder>

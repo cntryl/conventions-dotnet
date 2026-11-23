@@ -15,6 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="../../src/Conventions.Analyzers/Conventions.Analyzers.csproj"
                       OutputItemType="Analyzer" ReferenceOutputAssembly="true"/>
+    <ProjectReference Include="../../src/Conventions.CodeFixes/Conventions.CodeFixes.csproj"/>
   </ItemGroup>
 
 </Project>
