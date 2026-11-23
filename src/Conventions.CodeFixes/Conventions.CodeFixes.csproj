@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Workspace code fixes for Cntryl.Conventions.Analyzers diagnostics.</Description>
+    <PackageId>Cntryl.Conventions.CodeFixes</PackageId>
+    <AssemblyName>Cntryl.Conventions.CodeFixes</AssemblyName>
+    <RootNamespace>Cntryl.Conventions.CodeFixes</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" PrivateAssets="all"/>
+    <ProjectReference Include="../Conventions.Analyzers/Conventions.Analyzers.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildProjectDirectory)/../Conventions.Analyzers/bin/$(Configuration)/netstandard2.0/Cntryl.Conventions.Analyzers.dll"
+          Pack="true"
+          PackagePath="analyzers/dotnet/cs"
+          Visible="false"/>
+  </ItemGroup>
+
+</Project>

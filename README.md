@@ -9,6 +9,8 @@ Roslyn analyzers and code fixes that enforce the team's C# and test conventions.
 | `CNTRYL1001` | Wrapped declaration parameter lists are formatted atomically |
 | `CNTRYL1002` | Control-flow blocks are separated from surrounding statements by blank lines |
 
+`Cntryl.Conventions.CodeFixes` provides Fix All support for `CNTRYL1001` and `CNTRYL1002`.
+
 The testing rules detect xUnit, NUnit and MSTest, and stay inert in projects that reference
 none of them.
 

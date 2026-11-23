@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.0.4]
+
+### Added
+
+- Code fixes for `CNTRYL1001` and `CNTRYL1002`.
+- `Cntryl.Conventions.CodeFixes` package containing Fix All support for general declaration
+  wrapping and control-flow spacing diagnostics.
+
 ## [1.0.3]
 
 ### Added
