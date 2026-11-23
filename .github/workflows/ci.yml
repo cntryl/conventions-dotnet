@@ -15,10 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v6
+        uses: actions/setup-dotnet@v6.1.0
         with:
           dotnet-version: "11.0.x"
           cache: true
@@ -39,7 +39,7 @@ jobs:
         run: dotnet test --solution Conventions.slnx -c Release --no-build --no-restore
 
       - name: Install minimum supported compiler
-        uses: actions/setup-dotnet@v6
+        uses: actions/setup-dotnet@v6.1.0
         with:
           dotnet-version: "11.0.100"
 
