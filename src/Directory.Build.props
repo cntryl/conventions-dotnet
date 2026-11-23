@@ -20,11 +20,10 @@
     <DebugType>portable</DebugType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageOutputPath>$(MSBuildThisFileDirectory)../artifacts/packages</PackageOutputPath>
-    <PackageTags>analyzers roslyn conventions tests naming arrange-act-assert xunit nunit mstest</PackageTags>
+    <PackageTags>analyzers roslyn conventions</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Shared/TestVerbInflection.cs" Link="Shared/TestVerbInflection.cs"/>
     <None Include="$(MSBuildThisFileDirectory)../README.md" Pack="true" PackagePath="/"/>
     <None Include="$(OutputPath)$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
   </ItemGroup>

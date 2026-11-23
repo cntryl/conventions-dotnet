@@ -2,7 +2,7 @@ using Cntryl.Conventions.Testing.Analyzers;
 using Cntryl.Conventions.Testing.CodeFixes;
 using Microsoft.CodeAnalysis.Text;
 
-namespace Cntryl.Conventions.Testing.Tests;
+namespace Cntryl.Conventions.Testing.Analyzers.Tests;
 
 public sealed class TestNamingAnalyzerTests
 {

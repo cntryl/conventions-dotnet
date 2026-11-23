@@ -47,7 +47,8 @@ public static class TestPhaseComments
         // so strings, disabled code, and other trivia cannot masquerade as phase comments.
         var span = body.Span;
         var triviaSpan = span;
-        if (span.Length <= 4096 && body.SyntaxTree.TryGetText(out var text))
+        var text = body.SyntaxTree.GetText(cancellationToken);
+        if (span.Length <= 4096)
         {
             var buffer = ArrayPool<char>.Shared.Rent(span.Length);
             try
@@ -73,7 +74,7 @@ public static class TestPhaseComments
                         break;
                     }
 
-                    if (RecordMarker(trivia, ref markers))
+                    if (RecordMarker(trivia, text, ref markers))
                     {
                         return markers;
                     }
@@ -91,7 +92,7 @@ public static class TestPhaseComments
         foreach (var trivia in body.DescendantTrivia(triviaSpan))
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia) && RecordMarker(trivia, ref markers))
+            if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia) && RecordMarker(trivia, text, ref markers))
             {
                 break;
             }
@@ -100,18 +101,20 @@ public static class TestPhaseComments
         return markers;
     }
 
-    static bool RecordMarker(SyntaxTrivia trivia, ref (int ArrangeAt, int ActAt, int AssertAt) markers)
+    static bool RecordMarker(
+        SyntaxTrivia trivia,
+        SourceText text,
+        ref (int ArrangeAt, int ActAt, int AssertAt) markers)
     {
-        var text = trivia.ToString();
-        if (markers.ArrangeAt < 0 && Matches(text, Arrange))
+        if (markers.ArrangeAt < 0 && Matches(text, trivia.Span, Arrange))
         {
             markers.ArrangeAt = trivia.SpanStart;
         }
-        else if (markers.ActAt < 0 && Matches(text, Act))
+        else if (markers.ActAt < 0 && Matches(text, trivia.Span, Act))
         {
             markers.ActAt = trivia.SpanStart;
         }
-        else if (markers.AssertAt < 0 && Matches(text, Assert))
+        else if (markers.AssertAt < 0 && Matches(text, trivia.Span, Assert))
         {
             markers.AssertAt = trivia.SpanStart;
         }
@@ -171,19 +174,27 @@ public static class TestPhaseComments
         return problems;
     }
 
-    static bool Matches(string text, string marker)
+    static bool Matches(SourceText text, TextSpan span, string marker)
     {
-        if (!text.StartsWith(marker, StringComparison.Ordinal))
+        if (span.Length < marker.Length)
         {
             return false;
         }
 
-        if (text.Length == marker.Length)
+        for (var index = 0; index < marker.Length; index++)
+        {
+            if (text[span.Start + index] != marker[index])
+            {
+                return false;
+            }
+        }
+
+        if (span.Length == marker.Length)
         {
             return true;
         }
 
-        var next = text[marker.Length];
+        var next = text[span.Start + marker.Length];
         return !char.IsLetterOrDigit(next);
     }
 }

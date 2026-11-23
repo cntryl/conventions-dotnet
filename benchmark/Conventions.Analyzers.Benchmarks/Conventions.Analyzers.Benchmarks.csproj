@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Cntryl.Conventions.Analyzers.Benchmarks</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/Conventions.Analyzers/Conventions.Analyzers.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="true"/>
+    <ProjectReference Include="../../src/Conventions.Testing.Analyzers/Conventions.Testing.Analyzers.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="true"/>
+  </ItemGroup>
+
+</Project>

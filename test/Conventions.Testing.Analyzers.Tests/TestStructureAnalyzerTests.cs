@@ -3,7 +3,7 @@ using Cntryl.Conventions.Testing.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Cntryl.Conventions.Testing.Tests;
+namespace Cntryl.Conventions.Testing.Analyzers.Tests;
 
 public sealed class TestStructureAnalyzerTests
 {
