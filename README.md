@@ -1,94 +1,73 @@
-# Cntryl.Conventions
+# Cntryl Conventions .NET
 
-Roslyn analyzers and code fixes that enforce the team's C# and test conventions.
-
-| Rule | Enforces |
-|---|---|
-| `CNTRYL0001` | Test names read as a specification: `Should<Outcome>Given<State>When<Action>` |
-| `CNTRYL0002` | Test bodies carry ordered `// Arrange`, `// Act`, `// Assert` comments |
-| `CNTRYL1001` | Wrapped declaration parameter lists are formatted atomically |
-| `CNTRYL1002` | Control-flow blocks are separated from surrounding statements by blank lines |
-
-`Cntryl.Conventions.CodeFixes` provides Fix All support for `CNTRYL1001` and `CNTRYL1002`.
-
-The testing rules detect xUnit, NUnit and MSTest, and stay inert in projects that reference
-none of them.
-
-Build this repository with the .NET 11 SDK or later. The compiler and IDE must host Roslyn
-5.12 or later to load these packages.
+Roslyn analyzers and code fixes for consistent C# formatting and test structure.
+The packages run in the compiler and IDE and add no application runtime dependency.
+Build this repository with the .NET 11 SDK or later. The compiler and IDE must
+host Roslyn 5.12 or later.
 
 ## Install
 
-The packages are published to GitHub Packages, not nuget.org. Add the `cntryl` source to
-your `NuGet.Config`:
+Packages are available from the Cntryl GitHub Packages feed. Configure
+[GitHub Packages authentication](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-nuget-registry)
+with a classic personal access token that has `read:packages`.
 
-```xml
-<packageSources>
-  <add key="cntryl" value="https://nuget.pkg.github.com/cntryl/index.json" />
-</packageSources>
-<packageSourceMapping>
-  <packageSource key="cntryl">
-    <package pattern="Cntryl.*" />
-  </packageSource>
-</packageSourceMapping>
+```sh
+dotnet nuget add source https://nuget.pkg.github.com/cntryl/index.json --name cntryl
 ```
 
-Reference the general analyzer from application projects:
+For general C# formatting rules:
 
-```
-dotnet package add Cntryl.Conventions.Analyzers
-```
-
-Reference the testing analyzer and code-fix packages from test projects:
-
-```
-dotnet package add Cntryl.Conventions.Testing.Analyzers
-dotnet package add Cntryl.Conventions.Testing.CodeFixes
+```sh
+dotnet add package Cntryl.Conventions.Analyzers
+dotnet add package Cntryl.Conventions.CodeFixes
 ```
 
-All packages are development dependencies and add no runtime reference.
+For test naming and structure, add these packages to test projects:
+
+```sh
+dotnet add package Cntryl.Conventions.Testing.Analyzers
+dotnet add package Cntryl.Conventions.Testing.CodeFixes
+```
+
+The testing rules detect xUnit, NUnit, and MSTest.
+
+## Rules
+
+| Rule | Enforces |
+| --- | --- |
+| `CNTRYL0001` | Test names in the form `Should<Outcome>Given<State>When<Action>`, such as `ShouldRejectOrderGivenInsufficientStock`. |
+| `CNTRYL0002` | Ordered `// Arrange`, `// Act`, and `// Assert` comments. |
+| `CNTRYL1001` | Consistent formatting across a wrapped declaration parameter list. |
+| `CNTRYL1002` | Blank lines between control-flow blocks and surrounding statements. |
+
+The general fixers support Fix All. The testing fixers update references when
+renaming a test and preserve indentation and line endings when inserting phase
+comments. They offer a fix where they can identify the change from the source.
 
 ## Configure
 
-`CNTRYL0001` requires a `Given` clause and treats `When` as optional. Both are configurable
-per directory in `.editorconfig`:
+`CNTRYL0001` requires `Given` by default and treats `When` as optional. Set
+naming requirements and rule severity per directory in `.editorconfig`.
 
 ```ini
 [test/**.cs]
 conventions_test_naming_require_given = true
-conventions_test_naming_require_when  = false
-
+conventions_test_naming_require_when = false
 dotnet_diagnostic.CNTRYL0001.severity = warning
 dotnet_diagnostic.CNTRYL0002.severity = warning
-dotnet_diagnostic.CNTRYL1001.severity = warning
-dotnet_diagnostic.CNTRYL1002.severity = warning
 ```
 
-Adopting on an existing suite: start both rules at `suggestion`, then raise them to
-`warning` (or `error`) per directory or per file as each is migrated.
+Use `suggestion` for gradual adoption in an existing suite.
 
-## Code fixes
+## Development
 
-`CNTRYL0002` inserts the three phase comments, placing `// Assert` at the first asserting
-statement and `// Act` at the statement before it. When those cannot be told apart — no
-assertion found, or fewer than three statements — no fix is offered rather than guessing.
-
-`CNTRYL0001` can only rename a third-person name to its `Should` form
-(`AcceptsValidRoute` → `ShouldAcceptValidRoute`), via `Renamer` so references update. A
-missing `Given` or `When` clause states intent that is absent from the source, so no fix is
-offered for it.
-
-Fix All updates references when renaming tests and checks for conflicting member signatures.
-The structure fix preserves the source file's indentation and line endings and skips methods
-that already have a phase marker.
-
-## Benchmarks
-
-Run the analyzer benchmark on .NET 11:
-
-```shell
-dotnet run --project benchmark/Conventions.Analyzers.Benchmarks/Conventions.Analyzers.Benchmarks.csproj -c Release -- --filter '*'
+```sh
+dotnet test --solution Conventions.slnx -c Release
 ```
 
-The suite reports time and allocations for the general analyzers, testing analyzers, and all
-analyzers against 500 representative test methods.
+See [Contributing](CONTRIBUTING.md) for repository conventions and the
+[changelog](CHANGELOG.md) for rule changes. The
+[benchmark project](benchmark/Conventions.Analyzers.Benchmarks) measures time and
+allocations on representative test methods.
+
+Cntryl Conventions is licensed under [Apache 2.0](LICENSE).
