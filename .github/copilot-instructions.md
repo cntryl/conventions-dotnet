@@ -33,7 +33,7 @@
 - The two test projects reference analyzer projects with `OutputItemType="Analyzer"` so the repository exercises its rules while testing their behavior. The testing test project additionally references the code-fix assembly.
 - `src/Shared/TestVerbInflection.cs` is deliberately compiled into both the testing analyzer and testing code-fix assemblies. Preserve that linkage when changing the inflection behavior; the assemblies are distributed separately.
 - The benchmark project references both analyzer assemblies and measures the general, testing, and combined analyzer paths.
-- Shared compiler settings are inherited from `Directory.Build.props`; package versions are centralized in `Directory.Packages.props`. `Directory.Build.targets` builds analyzer project references during design-time builds and validates package metadata during packing. Test/package/build behavior in CI is defined by `.github/workflows/ci.yml` and `.github/workflows/publish.yml`.
+- Shared compiler settings are inherited from `Directory.Build.props`; package versions are centralized in `Directory.Packages.props`. `Directory.Build.targets` builds analyzer project references during design-time builds and validates package metadata during packing. Test/package/build behavior in CI is defined by `.github/workflows/ci.yml` and `.github/workflows/packages.yml`.
 
 ## Analyzer and code-fix conventions
 
